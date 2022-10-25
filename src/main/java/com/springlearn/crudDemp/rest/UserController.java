@@ -1,21 +1,24 @@
 package com.springlearn.crudDemp.rest;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.springlearn.crudDemp.entity.Role;
 import com.springlearn.crudDemp.entity.User;
-import com.springlearn.crudDemp.entity.UserDetails;
-import com.springlearn.crudDemp.entity.UsernamePassword;
-import com.springlearn.crudDemp.service.RoleService;
 import com.springlearn.crudDemp.service.UserService;
+import com.springlearn.crudDemp.utility.AuthRequest;
+import com.springlearn.crudDemp.utility.AuthResponse;
+import com.springlearn.crudDemp.utility.JwtTokenUtility;
 
 @RestController
 @RequestMapping("/api")
@@ -25,64 +28,52 @@ public class UserController {
 	private UserService userService;
 
 	@Autowired
-	private RoleService roleService;
+	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	private Authentication authentication;
+	private String accessToken;
+	
+	@Autowired
+	private JwtTokenUtility jwtTokenUtility;
 
-	/*
-	 * User Controller ====>>> START
-	 * 
-	 * 
-	 */
+	@PostMapping("/auth")
+	public AuthResponse login(@RequestBody AuthRequest authRequest) {
+
+		try {
+			
+			System.out.println(authRequest.toString());
+			
+			authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
+			
+			User user = (User)authentication.getPrincipal();
+			
+			accessToken = jwtTokenUtility.generateAccessToken(user);
+			
+			return new AuthResponse(user.getEmail(), accessToken);
+			
+		} catch (BadCredentialsException e) {
+			throw new RuntimeException("Username/Password not found");
+		}
+	}
 
 	@GetMapping("/users")
 	public List<User> getUsers() {
-		return userService.findAll();
+		 return userService.findAll();
 	}
 
 	@PostMapping("/users")
-	public User createNewUser(@RequestBody UserDetails userDetails) {
-
-		final String userName = userDetails.getUserName();
-		final String password = userDetails.getPassword();
-		final String name = userDetails.getName();
-		final String email = userDetails.getEamil();
-		final int userRoleId = userDetails.getRoleId();
-		final Optional<Role> userRole = roleService.findById(userRoleId);
-		System.out.println(userDetails);
-		System.out.println(userRole);
+	public User createNewUser(@RequestBody User userDetails) {
 		
-		if(userRole == null || ! userRole.isPresent()) {
-			throw new RuntimeException("Role Not found");
+		if(userService.findByUsername(userDetails.getUsername()).isPresent()) {
+			throw new RuntimeException("Username already taken, Please choose different username");
 		}
 
-		UsernamePassword usernamePasswordId = new UsernamePassword(userName, password);
-
-		User user = new User(name, email, usernamePasswordId, userRoleId);
-
-		user = userService.saveUser(user);
-		return new User(user.getId(), user.getName(), user.getEamil());
+		userDetails.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+		
+		return userService.saveUser(userDetails);
 	}
-
-	/*
-	 * User Controller ====>>> END
-	 * 
-	 * 
-	 */
-
-	/*
-	 * Role Controller ====>>> START
-	 * 
-	 * 
-	 */
-
-	@GetMapping("/roles")
-	public List<Role> findAllRole() {
-		return roleService.findAll();
-	}
-
-	/*
-	 * Role Controller ====>>> end
-	 * 
-	 * 
-	 */
 
 }

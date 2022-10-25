@@ -1,16 +1,21 @@
 package com.springlearn.crudDemp.entity;
 
-import javax.persistence.CascadeType;
+import java.util.Collection;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+@SuppressWarnings("serial")
 @Entity
-public class User {
+@Table(name = "user")
+public class User implements UserDetails{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,29 +25,36 @@ public class User {
 	private String name;
 	
 	@Column(name = "email")
-	private String eamil;
-	
-	@OneToOne(cascade= CascadeType.ALL)
-	@JoinColumn(name = "user_password_id")
-	private UsernamePassword usernamePasswordId;
+	private String email;
 	
 	@Column(name = "role_id")
 	private int userRoleId;
+	
+	@Column(name = "username")
+	private String username;
+	
+	@Column(name = "password")
+	private String password;
+
 
 	public User() {
 	}
 
-	public User(int id, String name, String email) {
-		this.id = id;
+	public User(String name, String email, int userRoleId, String userName, String password) {
 		this.name = name;
-		this.eamil = email;
+		this.email = email;
+		this.userRoleId = userRoleId;
+		this.username = userName;
+		this.password = password;
 	}
 
-	public User(String name, String eamil, UsernamePassword usernamePasswordId, int userRoleId) {
+	public User(int id, String name, String email, int userRoleId, String userName, String password) {
+		this.id = id;
 		this.name = name;
-		this.eamil = eamil;
-		this.usernamePasswordId = usernamePasswordId;
+		this.email = email;
 		this.userRoleId = userRoleId;
+		this.username = userName;
+		this.password = password;
 	}
 
 	public int getId() {
@@ -61,20 +73,12 @@ public class User {
 		this.name = name;
 	}
 
-	public String getEamil() {
-		return eamil;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setEamil(String eamil) {
-		this.eamil = eamil;
-	}
-
-	public UsernamePassword getUsernamePasswordId() {
-		return usernamePasswordId;
-	}
-
-	public void setUsernamePasswordId(UsernamePassword usernamePasswordId) {
-		this.usernamePasswordId = usernamePasswordId;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public int getUserRoleId() {
@@ -85,10 +89,52 @@ public class User {
 		this.userRoleId = userRoleId;
 	}
 
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String userName) {
+		this.username = userName;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", eamil=" + eamil + ", usernamePasswordId=" + usernamePasswordId
-				+ ", userRoleId=" + userRoleId + "]";
+		return "User [id=" + id + ", name=" + name + ", email=" + email + ", userRoleId=" + userRoleId + ", userName="
+				+ username + ", password=" + password + "]";
 	}
-	
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getPassword() {
+		return this.password;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 }
