@@ -1,4 +1,4 @@
-package com.springlearn.crudDemp.utility;
+package com.springlearn.crudDemp.dto;
 
 public class AuthResponse {
 
