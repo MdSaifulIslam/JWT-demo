@@ -15,7 +15,7 @@
 	<name>crudDemp</name>
 	<description>CRUD project for Spring Boot</description>
 	<properties>
-		<java.version>18</java.version>
+		<java.version>1.8</java.version>
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
 	</properties>
 	<dependencies>

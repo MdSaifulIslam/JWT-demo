@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserService {
 	String path = currDir.getAbsolutePath();
 	
 
-	private final String FOLDER_PATH = path + "\\src\\main\\resources\\static\\img\\";
+	private final String FOLDER_PATH = path + "\\img\\";
 
 	@Autowired
 	private UserRepository userRepository;
