@@ -16,7 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -180,7 +182,7 @@ public class UserController {
 
 	@GetMapping("/users/picture")
 	public ResponseEntity<?> getUserPicture() throws Exception {
-		
+
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		User userDetails = userService.findByUsername(user.getUsername())
 				.orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
@@ -200,6 +202,40 @@ public class UserController {
 		task.setUserId(userDetails.getId());
 
 		return taskService.saveTask(task);
+	}
+
+	@PutMapping("/users/task")
+	public Task updateTask(@RequestBody Task task) throws IllegalStateException, IOException {
+
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		User userData = userService.findByUsername(user.getUsername())
+				.orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
+
+		taskService.findByIdAndUserId(task.getId(), userData.getId())
+				.orElseThrow(() -> new UsernameNotFoundException("Task Not Found"));
+		
+		task.setUserId(userData.getId());
+
+		return taskService.saveTask(task);
+
+		//return "Task Updated";
+	}
+
+	@DeleteMapping("/users/task/{id}")
+	public String deleteTask(@PathVariable("id") int taskId) throws IllegalStateException, IOException {
+
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		User userData = userService.findByUsername(user.getUsername())
+				.orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
+
+		Task task = taskService.findByIdAndUserId(taskId, userData.getId())
+				.orElseThrow(() -> new UsernameNotFoundException("Task Not Found"));
+
+		taskService.deleteTask(task);
+
+		return "Task Deleted";
 	}
 
 	@GetMapping("/users/task")
@@ -261,7 +297,7 @@ public class UserController {
 				.orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
 
 		if (user.getSocial() == 1 && user.getUpdated() == 0)
-			return "Social user not updated data, default password is: " + socialSecreteKey;
+			return "Social user not updated data, default password used";
 
 		return "";
 	}

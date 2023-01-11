@@ -7,6 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Entity
 @Table(name = "user_task")
 public class Task {
@@ -24,6 +26,7 @@ public class Task {
 	@Column(name = "task_date")
 	private String taskDate;
 
+	@Value("0")
 	@Column(name = "is_checked")
 	private String checked;
 
